@@ -5,7 +5,6 @@ import {
   ApolloClient,
   InMemoryCache,
   ApolloProvider,
-  gql,
 } from "@apollo/client";
 import Home from "./pages/Home";
 import Sidebar from "./components/Sidebar";

@@ -20,24 +20,26 @@ export type country = {
   };
   states: {
     name: string;
-  };
-  languages: {
-    code: string;
-    name: string;
   }[];
+  languages: general[];
 };
 export type selectedCountry = {
   name: string;
   capital: string;
   currency: string;
 };
-export type languages = {
+export type general = {
+  code: string;
   name: string;
-  capital: string;
-  currency: string;
 };
 
-export type countryNameFlag = {
+export type flags = {
+  name: { common: string };
+  flags: { png: string };
+  population: number;
+};
+
+export type code = {
   name: string;
   code: string;
 };
@@ -45,7 +47,7 @@ export type countryNameFlag = {
 const Home = () => {
   //States para el filtro de continentes
 
-  const [selectedContinents, setSelectedContinents] = useState([]);
+  const [selectedContinents, setSelectedContinents] = useState<general[]>([]);
 
   // LazyQuery para el filtro de continentes
   const [
@@ -69,7 +71,7 @@ const Home = () => {
   //Filtro de continentes
 
   const handleContinentClick = (code: any) => {
-    const updatedSelection = selectedContinents.includes(code)
+    const updatedSelection: any = selectedContinents.includes(code)
       ? selectedContinents.filter((continent) => continent !== code)
       : [...selectedContinents, code];
 
@@ -90,7 +92,7 @@ const Home = () => {
     searchCountries();
   }, [data]);
 
-  const [flagsCountries, setFLagsCountries] = useState([]);
+  const [flagsCountries, setFLagsCountries] = useState<flags[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -110,14 +112,14 @@ const Home = () => {
 
     fetchData();
   }, []);
-  const getFlagByCountryName = (countryNameFlag: any) => {
+  const getFlagByCountryName = (countryNameFlag: string) => {
     const country = flagsCountries.find(
       (country) => country.name.common === countryNameFlag
     );
     return country ? country.flags.png : "";
   };
 
-  const getPopulationContry = (countryNamePopulation) => {
+  const getPopulationContry = (countryNamePopulation: string) => {
     const contryPopulation = flagsCountries.find(
       (country) => country.name.common === countryNamePopulation
     );
@@ -140,7 +142,7 @@ const Home = () => {
     }
   };
 
-  const handleInputChange = (event) => {
+  const handleInputChange = (event: { target: { value: string } }) => {
     setInputValue(event.target.value);
     setSearchTerm(event.target.value);
   };
@@ -157,14 +159,16 @@ const Home = () => {
 
   // Seleccione Pais
   const [states, setStates] = useState<string>("");
-  const [selectedCountry, setSelectedCountry] = useState<any | null>(null);
+  const [selectedCountry, setSelectedCountry] = useState<country | null>(null);
 
-  const handleCountryClick = (country) => {
+  const handleCountryClick = (country: country) => {
     setSelectedCountry(country);
     setStates("");
-    const getStates = selectedCountry.states.map((state: any) => state.name);
-    const dataStates = getStates.join("\n");
-    setStates(dataStates);
+    const getStates = selectedCountry?.states.map(
+      (state: { name: string }) => state.name
+    );
+    const dataStates = getStates?.join("\n");
+    setStates(dataStates as string);
     toggleOffcanvas();
   };
   //offcanvas pais seleccionado
@@ -178,7 +182,7 @@ const Home = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   const filteredCountries =
-    data?.countries.filter((country) =>
+    data?.countries.filter((country: general) =>
       country.name.toLowerCase().includes(searchTerm.toLowerCase())
     ) || [];
   ///Modal
@@ -249,6 +253,7 @@ const Home = () => {
           isOpen={modalIsOpen}
           onRequestClose={closeModal}
           contentLabel="Ejemplo de Modal"
+          // @ts-ignore
           style={customStyles}
           shouldCloseOnOverlayClick={true}
         >
@@ -271,7 +276,7 @@ const Home = () => {
               <p>Error al cargar continentes: {continentsError.message}</p>
             ) : null}
             {continentsData &&
-              continentsData.continents.map((continent) => (
+              continentsData.continents.map((continent: general) => (
                 <div key={continent.code} style={{ textAlign: "center" }}>
                   <img
                     key={continent.code}
@@ -281,7 +286,7 @@ const Home = () => {
                       height: "5rem",
                       borderRadius: "10px",
                       width: "8rem",
-                      border: selectedContinents.includes(continent.code)
+                      border: selectedContinents.includes(continent)
                         ? "4px solid #50a8eb"
                         : "none",
                     }}
@@ -303,7 +308,7 @@ const Home = () => {
             ) : null}
             <div className="grid-container">
               {countriesData &&
-                countriesData.countries.map((country) => (
+                countriesData.countries.map((country: country) => (
                   <div
                     key={country.code}
                     className="grid-item"
@@ -359,7 +364,7 @@ const Home = () => {
               }`}
               data-coreui-scroll="true"
               data-coreui-backdrop="false"
-              tabIndex="-1"
+              tabIndex={-1}
               style={{ width: "340px", marginTop: "195px" }}
               id="offcanvasScrolling"
               aria-labelledby="offcanvasScrollingLabel"
@@ -419,11 +424,13 @@ const Home = () => {
                       </p>
                       <p className="country-text">
                         Language:
-                        {selectedCountry.languages.map((languages, index) => (
-                          <span className="continent-text" key={index}>
-                            {languages.name}&nbsp;
-                          </span>
-                        ))}
+                        {selectedCountry.languages.map(
+                          (languages: general, index: number) => (
+                            <span className="continent-text" key={index}>
+                              {languages.name}&nbsp;
+                            </span>
+                          )
+                        )}
                       </p>
                       <p className="country-text">
                         Population:{" "}
@@ -464,7 +471,7 @@ const Home = () => {
             {countryName && countryName.length > 0 && (
               <>
                 <div className="grid-container">
-                  {filteredCountries.map((country: any) => (
+                  {filteredCountries.map((country: country) => (
                     <div
                       key={country.code}
                       className="grid-item"
@@ -517,7 +524,7 @@ const Home = () => {
                   }`}
                   data-coreui-scroll="true"
                   data-coreui-backdrop="false"
-                  tabIndex="-1"
+                  tabIndex={-1}
                   style={{ width: "340px", marginTop: "195px" }}
                   id="offcanvasScrolling"
                   aria-labelledby="offcanvasScrollingLabel"
@@ -578,7 +585,7 @@ const Home = () => {
                           <p className="country-text">
                             Language:
                             {selectedCountry.languages.map(
-                              (languages, index) => (
+                              (languages: general, index: number) => (
                                 <span className="continent-text" key={index}>
                                   {languages.name}&nbsp;
                                 </span>
